@@ -125,9 +125,9 @@ class VisualiveSession {
     if (!(userData.id in this.users)) {
       this.users[userData.id] = userData
 
-      const roomMatePhoneNumber = this.fullRoomId + userData.id
+      const roommatePhoneNumber = this.fullRoomId + userData.id
       this.phone.ready(() => {
-        this.phone.dial(roomMatePhoneNumber)
+        this.phone.dial(roommatePhoneNumber)
       })
 
       this._publishMessage(
