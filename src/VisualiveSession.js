@@ -53,6 +53,7 @@ class VisualiveSession {
      * Socket actions.
      */
     this.socket && this.socket.close()
+
     this.socket = io(
       'https://apistage.visualive.io',
       // 'http://localhost:7070',
@@ -61,6 +62,15 @@ class VisualiveSession {
         query: `userId=${this.userData.id}&roomId=${this.fullRoomId}`,
       }
     )
+
+    window.addEventListener('beforeunload', () => {
+      this.socket.emit(VisualiveSession.actions.LEAVE_ROOM, {
+        payload: {
+          roomId: this.fullRoomId,
+          userData: this.userData,
+        },
+      })
+    })
 
     this.socket.on('disconnect', reason => {
       console.warn('Socket disconnected. Reason:', reason)
@@ -173,6 +183,7 @@ VisualiveSession.actions = {
   USER_JOINED: 'user-joined',
   PING_ROOM: 'ping-room',
   USER_PING: 'user-ping',
+  LEAVE_ROOM: 'leave-room',
   USER_LEFT: 'user-left',
   TEXT_MESSAGE: 'text-message',
   POSE_CHANGED: 'pose-message',
