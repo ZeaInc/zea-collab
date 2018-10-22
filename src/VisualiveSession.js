@@ -38,12 +38,12 @@ class VisualiveSession {
     })
 
     this.phone.message((session, message) => {
-      console.group('Phone message:')
-      console.info('Session:')
-      console.dir(session)
-      console.info('Message:')
-      console.dir(message)
-      console.groupEnd()
+      // console.group('Phone message:')
+      // console.info('Session:')
+      // console.dir(session)
+      // console.info('Message:')
+      // console.dir(message)
+      // console.groupEnd()
 
       const { type: messageType, userId } = message
       this._publishMessage(messageType, message.payload, message.userId)
@@ -97,7 +97,6 @@ class VisualiveSession {
       const { userData } = message.payload
       this._addUserIfNew(userData)
 
-      this._publishMessage(VisualiveSession.actions.USER_JOINED, userData)
     })
 
     this.socket.on(VisualiveSession.actions.USER_PING, message => {
