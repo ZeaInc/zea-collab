@@ -96,7 +96,6 @@ class VisualiveSession {
 
       const { userData } = message.payload
       this._addUserIfNew(userData)
-
     })
 
     this.socket.on(VisualiveSession.actions.USER_PING, message => {
