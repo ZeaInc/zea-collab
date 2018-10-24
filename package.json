@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "shortid": "^2.2.13",
-    "socket.io-client": "^2.1.1"
+    "socket.io-client": "^2.1.1",
+    "socketio-wildcard": "^2.0.0"
   },
   "devDependencies": {
     "eslint": "^5.5.0",
