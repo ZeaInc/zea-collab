@@ -57,15 +57,14 @@ class VisualiveSession {
 
     // Publish all messages.
     this.socket.on('*', packet => {
-      const [messageType, message] = packet.data
-      const callbacks = this.callbacks[messageType]
-      if (callbacks) {
-        callbacks.forEach(callback => callback(message))
-      }
+      const [messageType, message] = packet.data;
+      if(messageType in private_actions)
+        return;
+      this._emit(messageType, message.payload, message.userId);
     })
 
     window.addEventListener('beforeunload', () => {
-      this.socket.emit(VisualiveSession.actions.LEAVE_ROOM, {
+      this.socket.emit(private_actions.LEAVE_ROOM, {
         payload: {
           userData: this.userData,
         },
@@ -74,7 +73,7 @@ class VisualiveSession {
     })
 
     this.socket.once('connect', () => {
-      this.socket.emit(VisualiveSession.actions.JOIN_ROOM, {
+      this.socket.emit(private_actions.JOIN_ROOM, {
         payload: {
           userData: this.userData,
         },
@@ -85,25 +84,35 @@ class VisualiveSession {
       // console.warn('Socket disconnected. Reason:', reason)
     })
 
-    this.socket.on(VisualiveSession.actions.JOIN_ROOM, message => {
+    this.socket.on(private_actions.JOIN_ROOM, message => {
       console.info('join-room:', message)
-      this.socket.emit(VisualiveSession.actions.PING_ROOM, {
+      this.socket.emit(private_actions.PING_ROOM, {
         payload: {
           userData: this.userData,
-        },
+        }
       })
-
       const { userData } = message.payload
       this._addUserIfNew(userData)
     })
 
-    this.socket.on(VisualiveSession.actions.PING_ROOM, message => {
+    this.socket.on(private_actions.LEAVE_ROOM, message => {
+      const userData = message.payload.userData;
+      console.info('leave-room:', message)
+      if (!(userData.id in this.users)) {
+        console.warn("User not in room.");
+        return;
+      }
+      delete this.users[userData.id];
+      this._emit(VisualiveSession.actions.USER_LEFT, userData);
+    })
+
+    this.socket.on(private_actions.PING_ROOM, message => {
       console.info('ping-room:', message)
       const { userData } = message.payload
       this._addUserIfNew(userData)
     })
 
-    this.socket.on(VisualiveSession.actions.LEAVE_ROOM, message => {
+    this.socket.on(private_actions.LEAVE_ROOM, message => {
       console.info('leave-room:', message)
       const userId = message.payload.userData.id
       if (userId in this.users) {
@@ -115,12 +124,14 @@ class VisualiveSession {
 
   _addUserIfNew(userData) {
     if (!(userData.id in this.users)) {
-      this.users[userData.id] = userData
+      this.users[userData.id] = userData;
 
       const roommatePhoneNumber = this.fullRoomId + userData.id
       this.phone.ready(() => {
         this.phone.dial(roommatePhoneNumber)
       })
+
+      this._emit(VisualiveSession.actions.USER_JOINED, userData);
     }
   }
 
@@ -142,6 +153,10 @@ class VisualiveSession {
   getUsers() {
     return this.users
   }
+  
+  getUser(id) {
+    return this.users[id];
+  }
 
   pub(messageType, payload) {
     this.socket.emit(messageType, {
@@ -153,6 +168,13 @@ class VisualiveSession {
     })
   }
 
+  _emit(messageType, payload, userId) {
+    const callbacks = this.callbacks[messageType]
+    if (callbacks) {
+      callbacks.forEach(callback => callback(payload, userId))
+    }
+  }
+
   sub(messageType, callback) {
     const callbacks = this.callbacks[messageType]
     this.callbacks[messageType] = callbacks
@@ -161,10 +183,16 @@ class VisualiveSession {
   }
 }
 
-VisualiveSession.actions = {
+
+const private_actions = {
   JOIN_ROOM: 'join-room',
   PING_ROOM: 'ping-room',
-  LEAVE_ROOM: 'leave-room',
+  LEAVE_ROOM: 'leave-room'
+}
+
+VisualiveSession.actions = {
+  USER_JOINED: 'user-joined',
+  USER_LEFT: 'user-left',
   TEXT_MESSAGE: 'text-message',
   POSE_CHANGED: 'pose-message',
   COMMAND_ADDED: 'command-added',
