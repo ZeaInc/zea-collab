@@ -41,12 +41,7 @@ class VisualiveSession {
     /*
      * Socket actions.
      */
-    if(this.socket) {
-      this.socket.close()
-      // Instruct all client code to cleanup session user data.
-      this._emit(VisualiveSession.actions.LEFT_ROOM);
-      this.users = {}
-    }
+    this.leaveRoom()
 
     this.socket = io(
       'https://apistage.visualive.io',
@@ -60,12 +55,11 @@ class VisualiveSession {
     const patch = wildcardMiddleware(io.Manager)
     patch(this.socket)
 
-    // Publish all messages.
+    // Emit all messages, except the private ones.
     this.socket.on('*', packet => {
-      const [messageType, message] = packet.data;
-      if(messageType in private_actions)
-        return;
-      this._emit(messageType, message.payload, message.userId);
+      const [messageType, message] = packet.data
+      if (messageType in private_actions) return
+      this._emit(messageType, message.payload, message.userId)
     })
 
     window.addEventListener('beforeunload', () => {
@@ -94,21 +88,22 @@ class VisualiveSession {
       this.socket.emit(private_actions.PING_ROOM, {
         payload: {
           userData: this.userData,
-        }
+        },
       })
       const { userData } = message.payload
       this._addUserIfNew(userData)
     })
 
     this.socket.on(private_actions.LEAVE_ROOM, message => {
-      const userData = message.payload.userData;
       console.info('leave-room:', message)
-      if (!(userData.id in this.users)) {
-        console.warn("User not in room.");
-        return;
+      const { userData } = message.payload
+      const userId = userData.id
+      if (userId in this.users) {
+        delete this.users[userId]
+        this._emit(VisualiveSession.actions.USER_LEFT, userData)
+        return
       }
-      delete this.users[userData.id];
-      this._emit(VisualiveSession.actions.USER_LEFT, userData);
+      console.warn('User not in room.')
     })
 
     this.socket.on(private_actions.PING_ROOM, message => {
@@ -116,27 +111,27 @@ class VisualiveSession {
       const { userData } = message.payload
       this._addUserIfNew(userData)
     })
+  }
 
-    this.socket.on(private_actions.LEAVE_ROOM, message => {
-      console.info('leave-room:', message)
-      const userId = message.payload.userData.id
-      if (userId in this.users) {
-        const userData = this.users[userId]
-        delete this.users[userId]
-      }
-    })
+  leaveRoom() {
+    if (this.socket) {
+      this.socket.close()
+    }
+    // Instruct all client code to cleanup session user data.
+    this._emit(VisualiveSession.actions.LEFT_ROOM)
+    this.users = {}
   }
 
   _addUserIfNew(userData) {
     if (!(userData.id in this.users)) {
-      this.users[userData.id] = userData;
+      this.users[userData.id] = userData
 
       const roommatePhoneNumber = this.fullRoomId + userData.id
       this.phone.ready(() => {
         this.phone.dial(roommatePhoneNumber)
       })
 
-      this._emit(VisualiveSession.actions.USER_JOINED, userData);
+      this._emit(VisualiveSession.actions.USER_JOINED, userData)
     }
   }
 
@@ -160,7 +155,7 @@ class VisualiveSession {
   }
 
   getUser(id) {
-    return this.users[id];
+    return this.users[id]
   }
 
   pub(messageType, payload) {
@@ -188,11 +183,10 @@ class VisualiveSession {
   }
 }
 
-
 const private_actions = {
   JOIN_ROOM: 'join-room',
   PING_ROOM: 'ping-room',
-  LEAVE_ROOM: 'leave-room'
+  LEAVE_ROOM: 'leave-room',
 }
 
 VisualiveSession.actions = {
