@@ -41,7 +41,12 @@ class VisualiveSession {
     /*
      * Socket actions.
      */
-    this.socket && this.socket.close()
+    if(this.socket) {
+      this.socket.close()
+      // Instruct all client code to cleanup session user data.
+      this._emit(VisualiveSession.actions.LEFT_ROOM);
+      this.users = {}
+    }
 
     this.socket = io(
       'https://apistage.visualive.io',
@@ -153,7 +158,7 @@ class VisualiveSession {
   getUsers() {
     return this.users
   }
-  
+
   getUser(id) {
     return this.users[id];
   }
@@ -193,6 +198,7 @@ const private_actions = {
 VisualiveSession.actions = {
   USER_JOINED: 'user-joined',
   USER_LEFT: 'user-left',
+  LEFT_ROOM: 'left-room',
   TEXT_MESSAGE: 'text-message',
   POSE_CHANGED: 'pose-message',
   COMMAND_ADDED: 'command-added',
