@@ -47,10 +47,7 @@ export default [
   },
   {
     input: 'src/index.js',
-    external: [
-      "@zeainc/zea-engine",
-      "@zeainc/zea-ux",
-    ],
+    external: ['@zeainc/zea-engine', '@zeainc/zea-ux', 'debug'],
     plugins: [nodePolyfills(), resolve(), commonjs()],
     output: [
       { file: pkg.rawimport, format: 'es', plugins: [rawImportPathsPlugin] },

@@ -3,7 +3,7 @@
 // import io from 'socket.io-client'
 import wildcardMiddleware from 'socketio-wildcard'
 
-// import debug from 'debug'
+import zeaDebug from './helpers/zeaDebug'
 
 /**
  * User specific room actions.
@@ -43,8 +43,6 @@ class Session {
     this.callbacks = {}
 
     this.envIsBrowser = typeof window !== 'undefined'
-
-    // this.debugCollab = debug('zea-collab')
   }
 
   /**
@@ -182,7 +180,7 @@ class Session {
     this.pub(private_actions.JOIN_ROOM)
 
     this.socket.on(private_actions.JOIN_ROOM, (message) => {
-      // this.debugCollab(`${private_actions.JOIN_ROOM}:\n%O`, message)
+      zeaDebug(`${private_actions.JOIN_ROOM}:\n%O`, message)
 
       const incomingUserData = message.userData
       this._addUserIfNew(incomingUserData)
@@ -191,7 +189,7 @@ class Session {
     })
 
     this.socket.on(private_actions.LEAVE_ROOM, (message) => {
-      // this.debugCollab(`${private_actions.LEAVE_ROOM}:\n%O`, message)
+      zeaDebug(`${private_actions.LEAVE_ROOM}:\n%O`, message)
 
       const outgoingUserData = message.userData
       const outgoingUserId = outgoingUserData.id
@@ -200,11 +198,11 @@ class Session {
         this._emit(Session.actions.USER_LEFT, outgoingUserData)
         return
       }
-      // this.debugCollab('Outgoing user was not found in room.')
+      zeaDebug('Outgoing user was not found in room.')
     })
 
     this.socket.on(private_actions.PING_ROOM, (message) => {
-      // this.debugCollab(`${private_actions.PING_ROOM}:\n%O`, message)
+      zeaDebug(`${private_actions.PING_ROOM}:\n%O`, message)
 
       const incomingUserData = message.userData
       this._addUserIfNew(incomingUserData)
@@ -213,7 +211,7 @@ class Session {
     /*
      * RTC
     const myPhoneNumber = `${this.roomId}${this.userData.id}`
-    // this.debugCollab('myPhoneNumber:', myPhoneNumber)
+    zeaDebug('myPhoneNumber:', myPhoneNumber)
 
     this.peer = new Peer(myPhoneNumber, {
       debug: 2,
@@ -232,12 +230,12 @@ class Session {
           })
         })
         .catch(err => {
-          // this.debugCollab('Failed to get local stream', err)
+          zeaDebug('Failed to get local stream', err)
         })
     })
 
     this.peer.on('error', err => {
-      // this.debugCollab('Peer error:', err)
+      zeaDebug('Peer error:', err)
     })
 
     window.addEventListener('beforeunload', () => {
@@ -253,7 +251,7 @@ class Session {
           const roommatePhoneNumber = `${this.roomId}${newUserData.id}`
 
           if (this.peer.disconnected) {
-            // this.debugCollab('Peer disconnected. Reconnecting.')
+            zeaDebug('Peer disconnected. Reconnecting.')
             this.peer.reconnect()
           }
 
@@ -266,7 +264,7 @@ class Session {
           })
         })
         .catch(err => {
-          // this.debugCollab('Failed to get local stream', err)
+          zeaDebug('Failed to get local stream', err)
         })
     })
      */
@@ -374,8 +372,10 @@ class Session {
     // In this case, the other users recieve a 'mouseMove' message
     // for a user they have not yet recieved the USER_JOINED message.
     if (userId && !this.users[userId]) {
-      console.warn(`Ignoring message for user not in session: ${messageType}. User id: ${userId}`)
-      return;
+      zeaDebug(
+        `Ignoring message for user not in session: ${messageType}. User id: ${userId}`
+      )
+      return
     }
 
     const callbacks = this.callbacks[messageType]
