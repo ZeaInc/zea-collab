@@ -68,7 +68,7 @@ class Avatar {
 
         avatarImage.on('labelRendered', (event) => {
           this.__avatarImageXfo.sc.set(0.15, 0.15, 1)
-          this.__avatarImageGeomItem.setLocalXfo(this.__avatarImageXfo)
+          this.__avatarImageGeomItem.getParameter('LocalXfo').setValue(this.__avatarImageXfo)
         })
       }
 
@@ -82,7 +82,7 @@ class Avatar {
       this.__avatarImageXfo = new Xfo()
       this.__avatarImageXfo.sc.set(0.2, 0.2, 1)
       this.__avatarImageXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI)
-      this.__avatarImageGeomItem.setLocalXfo(this.__avatarImageXfo)
+      this.__avatarImageGeomItem.getParameter('LocalXfo').setValue(this.__avatarImageXfo)
 
       ///////////////////////////////////////////////
 
@@ -94,7 +94,7 @@ class Avatar {
       const borderXfo = new Xfo()
       borderXfo.sc.set(1.1, 1.1, 1.1)
       borderXfo.tr.set(0.0, 0.0, -0.001)
-      avatarImageBorderGeomItem.setLocalXfo(borderXfo)
+      avatarImageBorderGeomItem.getParameter('LocalXfo').setValue(borderXfo)
       this.__avatarImageGeomItem.addChild(avatarImageBorderGeomItem, false)
     }
   }
@@ -119,11 +119,11 @@ class Avatar {
       this.__avatarCamXfo = new Xfo()
       this.__avatarCamXfo.sc.set(16 * sc, 9 * sc, 1)
       this.__avatarCamXfo.tr.set(0, 0, -0.1 * sc)
-      this.__avatarCamGeomItem.setLocalXfo(this.__avatarCamXfo)
+      this.__avatarCamGeomItem.getParameter('LocalXfo').setValue(this.__avatarCamXfo)
 
       const aspect = video.videoWidth / video.videoHeight
       this.__avatarCamXfo.sc.x = this.__avatarCamXfo.sc.y * aspect
-      this.__avatarImageGeomItem.setLocalXfo(this.__avatarCamXfo)
+      this.__avatarImageGeomItem.getParameter('LocalXfo').setValue(this.__avatarCamXfo)
     }
 
     if (this.__currentViewMode == 'CameraAndPointer') {
@@ -142,7 +142,7 @@ class Avatar {
       const sc = 0.02
       this.__avatarImageXfo.sc.set(9 * sc, 9 * sc, 1)
       this.__avatarImageXfo.tr.set(0, 0, -0.1 * sc)
-      this.__avatarImageGeomItem.setLocalXfo(this.__avatarImageXfo)
+      this.__avatarImageGeomItem.getParameter('LocalXfo').setValue(this.__avatarImageXfo)
       this.__treeItem.getChild(0).addChild(this.__avatarImageGeomItem, false)
     }
   }
@@ -196,10 +196,14 @@ class Avatar {
     const sc = 0.02
     const shape = new Cuboid(16 * sc, 9 * sc, 3 * sc, true) // 16:9
     const pinch = new Vec3(0.1, 0.1, 1)
-    shape.getVertex(0).multiplyInPlace(pinch)
-    shape.getVertex(1).multiplyInPlace(pinch)
-    shape.getVertex(2).multiplyInPlace(pinch)
-    shape.getVertex(3).multiplyInPlace(pinch)
+
+    {
+      const positions = shape.getVertexAttribute('positions')
+      positions.getValueRef(0).multiplyInPlace(pinch)
+      positions.getValueRef(1).multiplyInPlace(pinch)
+      positions.getValueRef(2).multiplyInPlace(pinch)
+      positions.getValueRef(3).multiplyInPlace(pinch)
+    }
 
     shape.computeVertexNormals()
     const material = new Material('user' + this.__userData.id + 'Material', 'SimpleSurfaceShader')
@@ -212,9 +216,13 @@ class Avatar {
     const line = new Lines()
     line.setNumVertices(2)
     line.setNumSegments(1)
-    line.setSegment(0, 0, 1)
-    line.getVertex(0).set(0.0, 0.0, 0.0)
-    line.getVertex(1).set(0.0, 0.0, 1.0)
+    line.setSegmentVertexIndices(0, 0, 1)
+
+    {
+      const positions = line.getVertexAttribute('positions')
+      positions.getValueRef(0).set(0.0, 0.0, 0.0)
+      positions.getValueRef(1).set(0.0, 0.0, 1.0)
+    }
     line.setBoundingBoxDirty()
     this.pointerXfo = new Xfo()
     this.pointerXfo.sc.set(1, 1, 0)
@@ -223,7 +231,7 @@ class Avatar {
     this.__pointermat.getParameter('BaseColor').setValue(this.__avatarColor)
 
     this.__pointerItem = new GeomItem('Pointer', line, this.__pointermat)
-    this.__pointerItem.setLocalXfo(this.pointerXfo)
+    this.__pointerItem.getParameter('LocalXfo').setValue(this.pointerXfo)
 
     // If the webcam stream is available, attach it
     // else attach the avatar image. (which should always be available)
@@ -232,7 +240,7 @@ class Avatar {
     } else if (this.__avatarImageGeomItem) {
       this.__avatarImageXfo.sc.set(9 * sc, 9 * sc, 1)
       this.__avatarImageXfo.tr.set(0, 0, -0.1 * sc)
-      this.__avatarImageGeomItem.setLocalXfo(this.__avatarImageXfo)
+      this.__avatarImageGeomItem.getParameter('LocalXfo').setValue(this.__avatarImageXfo)
       geomItem.addChild(this.__avatarImageGeomItem, false)
     }
 
@@ -263,21 +271,21 @@ class Avatar {
         const sc = data.focalDistance / 5
         if (sc > 1) data.viewXfo.sc.set(sc, sc, sc)
       }
-      this.__treeItem.getChild(0).setLocalXfo(data.viewXfo)
+      this.__treeItem.getChild(0).getParameter('LocalXfo').setValue(data.viewXfo)
       this.pointerXfo.sc.z = 0
-      this.__treeItem.getChild(1).setLocalXfo(this.pointerXfo)
+      this.__treeItem.getChild(1).getParameter('LocalXfo').setValue(this.pointerXfo)
     } else if (data.movePointer) {
       this.pointerXfo.tr = data.movePointer.start
       this.pointerXfo.ori.setFromDirectionAndUpvector(data.movePointer.dir, up)
       this.pointerXfo.sc.z = data.movePointer.length
-      this.__treeItem.getChild(1).setLocalXfo(this.pointerXfo)
+      this.__treeItem.getChild(1).getParameter('LocalXfo').setValue(this.pointerXfo)
     } else if (data.hilightPointer) {
       this.__pointermat.getParameter('BaseColor').setValue(this.__hilightPointerColor)
     } else if (data.unhilightPointer) {
       this.__pointermat.getParameter('BaseColor').setValue(this.__avatarColor)
     } else if (data.hidePointer) {
       this.pointerXfo.sc.z = 0
-      this.__treeItem.getChild(1).setLocalXfo(this.pointerXfo)
+      this.__treeItem.getChild(1).getParameter('LocalXfo').setValue(this.pointerXfo)
     }
   }
 
@@ -298,7 +306,7 @@ class Avatar {
     if (this.__avatarImageGeomItem) {
       this.__avatarImageXfo.sc.set(0.12, 0.12, 1)
       this.__avatarImageXfo.tr.set(0, -0.04, -0.135)
-      this.__avatarImageGeomItem.setLocalXfo(this.__avatarImageXfo)
+      this.__avatarImageGeomItem.getParameter('LocalXfo').setValue(this.__avatarImageXfo)
       hmdHolder.addChild(this.__avatarImageGeomItem, false)
     }
 
@@ -348,7 +356,7 @@ class Avatar {
               xfo.tr.set(0, -0.03, -0.03)
               xfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI)
               xfo.sc.set(0.001) // VRAsset units are in mm. convert meters
-              hmdGeomItem.setLocalXfo(xfo)
+              hmdGeomItem.getParameter('LocalXfo').setValue(xfo)
 
               this.__hmdGeomItem = hmdGeomItem
 
@@ -392,7 +400,7 @@ class Avatar {
             }),
             new Vec3(0.001, 0.001, 0.001) // VRAsset units are in mm. convert meters
           )
-          controllerTree.setLocalXfo(xfo)
+          controllerTree.getParameter('LocalXfo').setValue(xfo)
           treeItem.addChild(controllerTree, false)
         }
         this.__vrAsset.on('geomsLoaded', () => {
@@ -401,14 +409,14 @@ class Avatar {
       }
     }
 
-    if (data.viewXfo) this.__treeItem.getChild(0).setGlobalXfo(data.viewXfo)
+    if (data.viewXfo) this.__treeItem.getChild(0).getParameter('GlobalXfo').setValue(data.viewXfo)
 
     if (data.controllers) {
       for (let i = 0; i < data.controllers.length; i++) {
         if (data.controllers[i] && !this.__controllerTrees[i]) {
           setupController(i)
         }
-        this.__controllerTrees[i].setGlobalXfo(data.controllers[i].xfo)
+        this.__controllerTrees[i].getParameter('GlobalXfo').setValue(data.controllers[i].xfo)
       }
     }
     if (data.showUIPanel) {
@@ -426,7 +434,7 @@ class Avatar {
 
         const localXfo = new Xfo()
         localXfo.fromJSON(data.showUIPanel.localXfo)
-        this.__uiGeomItem.setLocalXfo(localXfo)
+        this.__uiGeomItem.getParameter('LocalXfo').setValue(localXfo)
       }
       this.__uiGeomIndex = this.__controllerTrees[data.showUIPanel.controllerId].addChild(this.__uiGeomItem, false)
     } else if (data.updateUIPanel) {
