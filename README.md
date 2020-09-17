@@ -1,6 +1,8 @@
 # Zea Collab
 
-`npm install @zeainc/zea-collab`
+```bash
+yarn add @zeainc/zea-collab
+```
 
 ## How to add Zea Collab to your project
 
@@ -23,5 +25,7 @@ For production environment:
 
 ## To build and dist
 
-`yarn dist`
+```bash
+yarn run dist
+```
 
