@@ -1,9 +1,5 @@
 # Zea Collab
 
-```bash
-yarn add @zeainc/zea-collab
-```
-
 ## How to add Zea Collab to your project
 
 Insert these tags in your page:
