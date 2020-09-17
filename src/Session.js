@@ -1,8 +1,7 @@
-// Note: this import is disabled for the rawimport version of collab and io must be loaded by a script tag.
 import io from 'socket.io-client'
 import wildcardMiddleware from 'socketio-wildcard'
 
-import zeaDebug from './helpers/zeaDebug'
+import { zeaDebug } from './helpers/zeaDebug'
 
 /**
  * User specific room actions.
@@ -138,7 +137,7 @@ class Session {
 
   /**
    * Joins the user to a room and subscribes to all [private actions](#private_actions).
-   * Also subscribes the user to a wildcard event that can recieve any custom action(Excluding private actions).
+   * Also subscribes the user to a wildcard event that can recieve any custom action (Excluding private actions).
    * This is very useful when you wanna emit/publish custom events that are not in the pre-stablished custom [actions](#actions).
    * <br>
    * Emits/publishes the `JOIN_ROOM` event. **See:** [action](#action)
@@ -147,6 +146,8 @@ class Session {
    */
   joinRoom(roomId) {
     this.roomId = roomId
+
+    zeaDebug('Attempting connection to server "%s" and room id "%s"', this.socketUrl, this.roomId)
 
     /*
      * Socket actions.
