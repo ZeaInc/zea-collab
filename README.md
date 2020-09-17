@@ -20,8 +20,14 @@ For production environment:
 <script crossorigin src="https://unpkg.com/@zeainc/zea-collab"></script>
 ```
 
+## How to enable useful debug messages
 
-## To build and dist
+1. Open the DevTools console.
+2. Input this command: `localStorage.debug = 'zea:collab'`
+3. Reload your browser.
+
+
+## How to build and dist
 
 ```bash
 yarn run dist
