@@ -1,5 +1,7 @@
 # Zea Collab
 
+The Zea Collab library provides Client and Server side tools for connecting and synchronizing users.
+
 ## How to add Zea Collab to your project
 
 Insert these tags in your page:
