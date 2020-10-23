@@ -1,3 +1,9 @@
+import { libsRegistry } from '@zeainc/zea-engine'
+
+import pkg from '../package.json'
+
+libsRegistry.registerLib(pkg)
+
 import Session from './Session'
 import SessionFactory from './SessionFactory'
 import SessionRecorder from './SessionRecorder'

@@ -1,4 +1,5 @@
 import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
 import nodePolyfills from 'rollup-plugin-node-polyfills'
 import { terser } from 'rollup-plugin-terser'
@@ -13,6 +14,7 @@ const plugins = [
   }),
   commonjs(),
   nodePolyfills(),
+  json(),
 ]
 
 const isProduction = !process.env.ROLLUP_WATCH
