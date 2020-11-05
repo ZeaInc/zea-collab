@@ -1,8 +1,16 @@
-import { libsRegistry } from '@zeainc/zea-engine'
+import * as zeaEngine from '@zeainc/zea-engine'
 
 import pkg from '../package.json'
 
-libsRegistry.registerLib(pkg)
+const { libsRegistry } = zeaEngine
+
+if (libsRegistry) {
+  libsRegistry.registerLib(pkg)
+} else {
+  console.warn(
+    "The version of the Zea Engine that you're using doesn't support the libraries registry. Please upgrade to the latest Zea Engine version."
+  )
+}
 
 import Session from './Session'
 import SessionFactory from './SessionFactory'
