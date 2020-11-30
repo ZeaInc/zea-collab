@@ -281,9 +281,15 @@ class SessionSync {
           console.warn('User id not in session:', userId)
           return
         }
+        const context = {
+          appData: {
+            selectionManager: userDatas[userId].selectionManager,
+            scene: appData.scene,
+          },
+        }
         const undoRedoManager = userDatas[userId].undoRedoManager
         const changeData = convertValuesFromJSON(data, appData.scene)
-        undoRedoManager.getCurrentChange().update(changeData)
+        undoRedoManager.getCurrentChange().updateFromJSON(changeData, context)
       })
 
       // ///////////////////////////////////////////
