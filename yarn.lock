@@ -1282,10 +1282,13 @@
     debug "^4.1.1"
     semver "^7.3.2"
 
-"@zeainc/zea-engine@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@zeainc/zea-engine/-/zea-engine-2.2.0.tgz#351bce2cce7bbd5d40da7b8ada000f44a90d0af1"
-  integrity sha512-eNGmY6PXwvllIBm586m2TxgUUpDpWdMKtgQorxRJEURbDfYMX5x4NDaHdzw1JopSIbgLM3oqQ3yVVr4tHPYOUQ==
+"@zeainc/zea-engine@^3.0.0":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@zeainc/zea-engine/-/zea-engine-3.0.1.tgz#f9effc74932907a50acba12a99d026c8acebee0a"
+  integrity sha512-9fwm6uRSaJzYV6/lwE/hx9bN5brOPV9hCtg2QSy08p7NWsphpFpLz52+Fpkvc6j7pLT44H+latG8pgm9GgITwg==
+  dependencies:
+    debug "^4.1.1"
+    semver "^7.3.2"
 
 "@zeainc/zea-ux@2.1.0":
   version "2.1.0"
@@ -3460,9 +3463,9 @@ inherits@2.0.3:
   integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
 ini@^1.3.2, ini@^1.3.4, ini@~1.3.0:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
-  integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+  version "1.3.8"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.8.tgz#a29da425b48806f34767a4efce397269af28432c"
+  integrity sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==
 
 interpret@^1.0.0:
   version "1.4.0"
