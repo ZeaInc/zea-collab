@@ -17,6 +17,9 @@ import {
   VLAAsset,
 } from '@zeainc/zea-engine'
 
+const plane = new Plane(1, 1)
+const disc = new Disc(0.5, 64)
+
 /**
  * The Avatar is used to display a 3d representation of remote users in a 3d scene.
  */
@@ -43,7 +46,6 @@ class Avatar {
     this.__avatarColor = new Color(userData.color || '#aaaaaa')
     this.__highlightPointerColor = new Color(1, 0, 0)
 
-    this.__plane = new Plane(1, 1)
     this.__uiGeomIndex = -1
 
     if (!this.__currentUserAvatar) {
@@ -51,7 +53,6 @@ class Avatar {
       this.__cameraBound = false
 
       let avatarImage
-      const geom = new Disc(0.5, 64)
       if (this.__userData.picture && this.__userData.picture != '') {
         avatarImage = new LDRImage('user' + this.__userData.id + 'AvatarImage')
         avatarImage.setImageURL(this.__userData.picture)
@@ -91,7 +92,7 @@ class Avatar {
       avatarImageMaterial.getParameter('BaseColor').setImage(avatarImage)
 
       avatarImageMaterial.visibleInGeomDataBuffer = false
-      this.__avatarImageGeomItem = new GeomItem('avatarImage', geom, avatarImageMaterial)
+      this.__avatarImageGeomItem = new GeomItem('avatarImage', disc, avatarImageMaterial)
 
       this.__avatarImageXfo = new Xfo()
       this.__avatarImageXfo.sc.set(0.2, 0.2, 1)
@@ -132,7 +133,7 @@ class Avatar {
         // avatarNameplateMaterial.getParameter('BaseColor').setValue(this.__avatarColor)
         avatarNameplateMaterial.getParameter('BaseColor').setImage(avatarNameplate)
         avatarNameplateMaterial.visibleInGeomDataBuffer = false
-        this.avatarNameplateGeomItem = new GeomItem('avatarNameplate', this.__plane, avatarNameplateMaterial)
+        this.avatarNameplateGeomItem = new GeomItem('avatarNameplate', plane, avatarNameplateMaterial)
 
         this.__avatarImageGeomItem.addChild(this.avatarNameplateGeomItem, false)
       }
@@ -142,7 +143,7 @@ class Avatar {
       const avatarImageBorderMaterial = new Material('avatarImageBorderMaterial', 'FlatSurfaceShader')
       avatarImageBorderMaterial.getParameter('BaseColor').setValue(new Color(0, 0, 0, 1))
       avatarImageBorderMaterial.visibleInGeomDataBuffer = false
-      const avatarImageBorderGeomItem = new GeomItem('avatarImageBorder', geom, avatarImageBorderMaterial)
+      const avatarImageBorderGeomItem = new GeomItem('avatarImageBorder', disc, avatarImageBorderMaterial)
 
       const borderXfo = new Xfo()
       borderXfo.sc.set(1.1, 1.1, 1.1)
@@ -166,7 +167,7 @@ class Avatar {
       this.__avatarCamMaterial.getParameter('BaseColor').setValue(this.__avatarColor)
       this.__avatarCamMaterial.getParameter('BaseColor').setImage(videoItem)
       this.__avatarCamMaterial.visibleInGeomDataBuffer = false
-      this.__avatarCamGeomItem = new GeomItem('avatarImage', this.__plane, this.__avatarCamMaterial)
+      this.__avatarCamGeomItem = new GeomItem('avatarImage', plane, this.__avatarCamMaterial)
 
       const sc = 0.02
       this.__avatarCamXfo = new Xfo()
@@ -536,7 +537,7 @@ class Avatar {
         // Flip it over so we see the front.
         this.__uiGeomOffsetXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI)
 
-        this.__uiGeomItem = new GeomItem('VRControllerUI', this.__plane, uimat)
+        this.__uiGeomItem = new GeomItem('VRControllerUI', plane, uimat)
         this.__uiGeomItem.setGeomOffsetXfo(this.__uiGeomOffsetXfo)
 
         const localXfo = new Xfo()

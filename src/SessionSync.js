@@ -287,7 +287,8 @@ class SessionSync {
         }
         const undoRedoManager = this.userDatas[userId].undoRedoManager
         const changeData = convertValuesFromJSON(data, appData.scene)
-        undoRedoManager.getCurrentChange().update(changeData)
+        const change = undoRedoManager.getCurrentChange()
+        change.updateFromJSON(changeData)
       })
 
       // ///////////////////////////////////////////

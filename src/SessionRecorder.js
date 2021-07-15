@@ -20,24 +20,27 @@ class SessionRecorder {
    */
   constructor(session) {
     this.session = session
+    this.__timeoutIds = {}
+    this.__users = {}
 
     // TODO: Check for credentials on the user.
     {
       const pictures = ['https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png']
 
-      const data = {}
-      let recording = false
+      const recording = {}
+      const streamTimes = {}
+      let recordingActive = false
       let presenter
       let pub
       let stream
       this.__startRecording = () => {
-        if (recording) return
-        recording = true
+        if (recordingActive) return
+        recordingActive = true
         const picIndex = getRandomInt(pictures.length)
         presenter = {
           id: genID(),
           picture: pictures[picIndex],
-          name: 'Presenter' + Object.keys(data).length,
+          name: 'Presenter' + Object.keys(recording).length,
         }
 
         stream = []
@@ -45,7 +48,8 @@ class SessionRecorder {
           messageType: 'user-joined',
           payload: presenter,
         }
-        let prev_t = performance.now()
+        const recordingStartTime = performance.now()
+        let prev_t = recordingStartTime
         pub = this.session.pub
         this.session.pub = (messageType, payload) => {
           // Record the time since the previous
@@ -57,6 +61,7 @@ class SessionRecorder {
             messageType,
             payload,
           }
+          streamTimes[presenter.id] = t
           prev_t = t
           pub.call(this.session, messageType, payload)
         }
@@ -68,11 +73,11 @@ class SessionRecorder {
           payload: presenter,
         })
 
-        data[presenter.id] = stream
+        recording[presenter.id] = stream
 
         this.session.pub = pub
 
-        this.__playRecording(data)
+        this.__playRecording(recording)
       }
     }
   }
@@ -94,13 +99,50 @@ class SessionRecorder {
   __stopPlayback() {
     for (let key in this.__timeoutIds) clearTimeout(this.__timeoutIds[key])
     this.__timeoutIds = {}
+
+    // Remove all the playback avatars
+    for (let key in this.__users) {
+      this.session._removeUser(this.__users[key])
+    }
+    this.__users = {}
   }
 
   __play(id, stream, done) {
     let i = 0
     const next = () => {
       const msg = stream[i]
-      this.session._emit(msg.messageType, msg.payload, id)
+      if (msg.messageType == 'user-joined') {
+        this.session._addUserIfNew(msg.payload)
+        // if (this.session.socket) {
+        //   this.session.socket.emit('join-room', {
+        //     userData: msg.payload,
+        //   })
+        // }
+
+        this.__users[msg.payload.id] = msg.payload
+      } else if (msg.messageType == 'user-left') {
+        this.session._removeUser(msg.payload)
+        // if (this.session.socket) {
+        //   this.session.socket.emit('leave-room', {
+        //     userData: msg.payload,
+        //   })
+        // }
+      } else {
+        this.session._emit(msg.messageType, msg.payload, id)
+      }
+
+      // Also broadcast this to other users so other users can view
+      // the playback.
+      // if (this.session.socket) {
+      //   this.session.socket.emit(msg.messageType, {
+      //     userData: {
+      //       id,
+      //     },
+      //     userId: id,
+      //     payload: msg.payload,
+      //   })
+      // }
+
       i++
       if (i < stream.length) {
         this.__timeoutIds[id] = setTimeout(next, msg.ms)
@@ -114,7 +156,6 @@ class SessionRecorder {
   __playRecording(recording) {
     this.__stopPlayback()
     let count = 0
-    this.__timeoutIds = {}
     for (let key in recording) {
       count++
       this.__play(key, recording[key], () => {

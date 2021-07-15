@@ -1,6 +1,6 @@
 {
   "name": "@zeainc/zea-collab",
-  "version": "5.2.0",
+  "version": "5.2.1-vr-tools.0",
   "description": "The Zea Collab library provides Client and Server side tools for connecting and synchronizing users.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
